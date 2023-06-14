@@ -22,55 +22,123 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bangkit.naksu.ui.theme.Primary
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.bangkit.naksu.R
 import com.bangkit.naksu.model.Menus
 import com.bangkit.naksu.model.MenusData
-import com.bangkit.naksu.ui.theme.Progress
+import com.bangkit.naksu.navigation.Screen
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
-    var progress by remember {
-        mutableStateOf(0.5f)
-    }
-
     val scrollState = rememberScrollState()
 
-    Column(modifier = Modifier.fillMaxSize().scrollable(scrollState, orientation = Orientation.Vertical)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .scrollable(scrollState, orientation = Orientation.Vertical)
+    ) {
         Banner()
-        LearningCard(progress)
-        MenuSection()
+        MenuSection(navController = navController)
+        Spacer(modifier = Modifier.height(16.dp))
+        Insight(navController = navController)
     }
 }
 
 @Composable
-fun MenuSection() {
+fun Insight(navController: NavHostController) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .shadow(elevation = 24.dp, shape = RoundedCornerShape(30.dp))
+            .clip(RoundedCornerShape(30.dp))
+            .background(color = Color.White)
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        DetailItem(
+            title = "What is Sundanese Script ? ",
+            desc = "Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Velit officia consequat duis enim velit mollit. ",
+            route = Screen.Detail1.route,
+            navController = navController
+        )
+        DetailItem(
+            title = "About Us",
+            desc = "Amet minim mollit non deserunt ullamco est sit aliqua dolor do amet sint. Velit officia consequat duis enim velit mollit. ",
+            route = Screen.About.route,
+            navController = navController
+        )
+    }
+}
+
+@Composable
+fun DetailItem(title: String, desc: String, route: String, navController: NavHostController) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                // TODO 2 : Navigate to Detail Screen
+                navController.navigate(route)
+            }
+        ,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .size(77.dp)
+                .background(color = Color(0xFFD9D9D9)), contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.img_placeholder),
+                contentDescription = "Image Placeholder",
+                modifier = Modifier
+                    .size(22.dp)
+            )
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(text = title, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(text = desc, fontSize = 12.sp)
+        }
+    }
+}
+
+@Composable
+fun MenuSection(navController: NavHostController) {
     val data = MenusData.menus
 
-    Column(modifier = Modifier.fillMaxWidth().padding(top = 16.dp),verticalArrangement = Arrangement.spacedBy(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 50.dp),
+        verticalArrangement = Arrangement.spacedBy(28.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth(0.8f)
+                .fillMaxWidth(0.5f)
                 .padding(horizontal = 24.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            MenuItem(menu = data[0])
-            MenuItem(menu = data[1])
-            MenuItem(menu = data[2])
+            MenuItem(menu = data[0], navController = navController)
+            MenuItem(menu = data[1], navController = navController)
         }
-        MenuItem(menu = data[3])
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(0.5f)
+                .padding(horizontal = 24.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            MenuItem(menu = data[2], navController = navController)
+            MenuItem(menu = data[3], navController = navController)
+        }
     }
 }
 
 @Composable
-fun MenuItem(menu: Menus) {
+fun MenuItem(menu: Menus, navController: NavHostController) {
     val backgroundColor = Primary
 
     val color = Color.Black
@@ -86,11 +154,12 @@ fun MenuItem(menu: Menus) {
                 .width(55.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .clickable {
-
+                    // TODO 1 : Navigate to Detail Screen
+                    navController.navigate(menu.route)
                 }
                 .background(color = backgroundColor),
         ) {
-            val tintColor =Color.White
+            val tintColor = Color.White
             Icon(
                 painter = painterResource(id = menu.image),
                 contentDescription = menu.title,
@@ -108,76 +177,6 @@ fun MenuItem(menu: Menus) {
 }
 
 @Composable
-fun LearningCard(progress: Float) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .offset(y = (-20).dp)
-            .shadow(elevation = 8.dp, shape = RoundedCornerShape(8.dp))
-            .background(color = Color.White, shape = RoundedCornerShape(8.dp))
-            .padding(16.dp)
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(
-                text = "Learned Today",
-                fontSize = 12.sp,
-                color = Color(R.color.gray),
-                fontFamily = FontFamily(
-                    Font(R.font.roboto)
-                ),
-            )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "30min", fontSize = 20.sp, color = Color.Black, fontFamily = FontFamily(
-                        Font(R.font.roboto_bold, FontWeight.Bold)
-                    ), modifier = Modifier.alignByBaseline()
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "/ 60min",
-                    fontSize = 10.sp,
-                    color = Color(R.color.gray),
-                    fontFamily = FontFamily(
-                        Font(R.font.roboto)
-                    ),
-                    modifier = Modifier.alignByBaseline()
-                )
-            }
-
-            // Progress Bar
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(12.dp)
-                    .padding(top = 5.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .alpha(0.3f)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Color(R.color.bg_progress))
-                )
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(progress)
-                        .fillMaxHeight()
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(
-                            brush = Brush.horizontalGradient(
-                                colors = listOf(
-                                    Color.White, Progress
-                                ), startX = 0.5f, endX = Float.POSITIVE_INFINITY
-                            )
-                        )
-                )
-            }
-        }
-    }
-}
-
-@Composable
 fun Banner() {
     Box(
         modifier = Modifier
@@ -186,14 +185,38 @@ fun Banner() {
             .background(Primary)
             .padding(16.dp)
     ) {
-        Text(
-            text = stringResource(id = R.string.home),
-            color = Color.White,
-            fontSize = 18.sp,
-            fontFamily = FontFamily(
-                Font(R.font.roboto_medium, FontWeight.Medium)
-            ),
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            Text(
+                text = stringResource(id = R.string.home),
+                color = Color.White,
+                fontSize = 18.sp,
+                fontFamily = FontFamily(
+                    Font(R.font.roboto_medium, FontWeight.Medium)
+                ),
+            )
+
+            Text(
+                text = "Hi, there",
+                color = Color.White,
+                fontSize = 24.sp,
+                fontFamily = FontFamily(
+                    Font(R.font.roboto_medium, FontWeight.Medium)
+                ),
+                modifier = Modifier.padding(top = 36.dp)
+            )
+            Text(
+                text = "Welcome to Naksu",
+                color = Color.White,
+                fontSize = 24.sp,
+                fontFamily = FontFamily(
+                    Font(R.font.roboto_medium, FontWeight.Medium)
+                ),
+            )
+
+        }
     }
 
 }
