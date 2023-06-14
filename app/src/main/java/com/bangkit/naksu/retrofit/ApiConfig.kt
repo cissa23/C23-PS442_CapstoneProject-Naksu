@@ -1,10 +1,14 @@
 package com.bangkit.naksu.retrofit
 
 import com.google.gson.annotations.SerializedName
+import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
+import retrofit2.http.Multipart
+import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Path
 
 class ApiConfig {
@@ -27,6 +31,12 @@ interface ApiService {
 
     @GET("show/{id}")
     fun getDataById(@Path("id") id: String): Call<ApiResponse>
+
+    @Multipart
+    @POST("upload")
+    fun uploadImage(
+        @Part image: MultipartBody.Part
+    ): Call<ApiResponse>
 }
 
 data class ApiResponse(

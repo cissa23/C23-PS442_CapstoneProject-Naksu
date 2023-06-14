@@ -1,15 +1,24 @@
 package com.bangkit.naksu.retrofit
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.bangkit.naksu.R
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.File
 
 class ResponseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,6 +27,50 @@ class ResponseActivity : AppCompatActivity() {
 
         getDataById("2A1BA")
         getAllData()
+        openGallery()
+    }
+
+    private val image =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val uri: Uri? = result.data?.data
+                if (uri != null) {
+                    uploadImage(uri)
+                }
+            }
+        }
+
+    private fun openGallery() {
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        image.launch(intent)
+    }
+
+    private fun uploadImage(uri: Uri) {
+        val file = uri.path?.let { File(it) }
+        val requestFile = file?.asRequestBody("image/jpeg".toMediaTypeOrNull())
+        val imagePart = requestFile?.let {
+            MultipartBody.Part.createFormData(
+                "image", file.name,
+                it
+            )
+        }
+
+        imagePart?.let { ApiConfig.getApiService().uploadImage(it) }
+            ?.enqueue(object : Callback<ApiResponse> {
+                override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
+                    if (response.isSuccessful) {
+                        val apiResponse = response.body()
+                        Log.i(TAG, "uploadImage onResponse: ${apiResponse?.message}")
+                    } else {
+                        val apiResponse = response.body()
+                        Log.i(TAG, "uploadImage onResponse: ${apiResponse?.message}")
+                    }
+                }
+
+                override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                    Log.e(TAG, "uploadImage OnFailure : ${t.message}")
+                }
+            })
     }
 
     private fun getDataById(id: String) {
@@ -40,11 +93,7 @@ class ResponseActivity : AppCompatActivity() {
                         try {
                             val message: ApiResponse =
                                 gson.fromJson(errorBody, ApiResponse::class.java)
-                            Toast.makeText(
-                                this@ResponseActivity,
-                                "Failed: ${message.message}",
-                                Toast.LENGTH_LONG
-                            ).show()
+                            Log.i(TAG, "onResponse: ${message.message}")
                         } catch (e: JsonSyntaxException) {
                             Toast.makeText(
                                 this@ResponseActivity, "Failed: $errorBody", Toast.LENGTH_LONG
@@ -56,9 +105,6 @@ class ResponseActivity : AppCompatActivity() {
 
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
                 Log.e(TAG, "OnFailure : ${t.message}")
-                Toast.makeText(
-                    this@ResponseActivity, "Failed: ${t.message}", Toast.LENGTH_LONG
-                ).show()
 
             }
         })
@@ -90,11 +136,7 @@ class ResponseActivity : AppCompatActivity() {
                         try {
                             val message: ApiResponse =
                                 gson.fromJson(errorBody, ApiResponse::class.java)
-                            Toast.makeText(
-                                this@ResponseActivity,
-                                "Failed: ${message.message}",
-                                Toast.LENGTH_LONG
-                            ).show()
+                            Log.i(TAG, "onResponse: ${message.message}")
                         } catch (e: JsonSyntaxException) {
                             Toast.makeText(
                                 this@ResponseActivity,
@@ -108,9 +150,6 @@ class ResponseActivity : AppCompatActivity() {
 
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
                 Log.e(TAG, "OnFailure : ${t.message}")
-                Toast.makeText(
-                    this@ResponseActivity, "Failed: ${t.message}", Toast.LENGTH_LONG
-                ).show()
 
             }
         })
