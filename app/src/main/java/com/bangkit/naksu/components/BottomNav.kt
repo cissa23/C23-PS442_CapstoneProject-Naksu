@@ -8,6 +8,7 @@ import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,7 +22,7 @@ import com.bangkit.naksu.R
 import com.bangkit.naksu.ui.theme.Background
 
 @Composable
-fun BottomNav(selected: String, route: String, navController: NavHostController) {
+fun BottomNav(selected: String, route: String, navController: NavHostController, showCamera: MutableState<Boolean>) {
     val gradientColors = listOf(Color(0xFFF2873A), Color(0xFFD80027))
     val brush = Brush.linearGradient(gradientColors)
     BottomNavigation(
@@ -72,7 +73,10 @@ fun BottomNav(selected: String, route: String, navController: NavHostController)
         )
         BottomNavigationItem(
             selected = selected === "camera",
-            onClick = { /* TODO: Handle item click */ },
+            onClick = {
+                showCamera.value = true
+                navController.navigate("camera_screen")
+            },
             icon = {
                 Box(
                     modifier = Modifier

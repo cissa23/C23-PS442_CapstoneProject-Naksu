@@ -14,7 +14,7 @@ object MenusData {
             id = 2,
             title = "Study",
             image = R.drawable.ic_kamera,
-            route = "study_screen"
+            route = "camera_screen"
         ),
         Menus(
             id = 3,

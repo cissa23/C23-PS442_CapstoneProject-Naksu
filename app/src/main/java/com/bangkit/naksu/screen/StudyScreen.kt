@@ -30,13 +30,13 @@ import com.bangkit.naksu.ui.theme.Background
 import com.bangkit.naksu.ui.theme.BackgroundBorder
 
 @Composable
-fun StudyScreen(navController: NavHostController) {
+fun StudyScreen(navController: NavHostController, showCamera: MutableState<Boolean>) {
     Scaffold(
         topBar = {
             AppBar(title = "Study Room")
         },
         bottomBar = {
-            BottomNav(selected = "study", route = Screen.Study.route, navController = navController)
+            BottomNav(selected = "study", route = Screen.Study.route, navController = navController, showCamera = showCamera)
         }
     ) { innerPadding ->
         Column(
@@ -181,5 +181,5 @@ fun StudyScreen(navController: NavHostController) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun PreviewStudyScreen(navController: NavHostController = rememberNavController()) {
-    StudyScreen(navController = navController)
+    StudyScreen(navController = navController, showCamera = remember { mutableStateOf(false) })
 }
